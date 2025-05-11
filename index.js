@@ -33,7 +33,7 @@ async function lerPDFsSequencialmente(pastaPDFs) {
 
 (async () => {
     const relatorios = [];
-    const caminhoBase = path.join(__dirname, "pdfs");
+    const caminhoBase = path.join(__dirname, "output");
     const subpastas = fs.readdirSync(caminhoBase).filter(nome => {
         const caminhoCompleto = path.join(caminhoBase, nome);
         return fs.statSync(caminhoCompleto).isDirectory();
@@ -102,7 +102,10 @@ async function lerPDFsSequencialmente(pastaPDFs) {
       fs.mkdirSync(pastaDestino, { recursive: true });
     }
 
-    fs.writeFileSync(path.join(pastaDestino, 'relatorios.json'), JSON.stringify(relatorios), 'utf-8');
-    fs.writeFileSync(path.join(pastaDestino, 'relatorios.html'), createHtml(relatorios), 'utf-8');
+    const currDate = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const dateFormat = currDate.split(/[/,:\s]+/).join('-');
+
+    fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.json`), JSON.stringify(relatorios), 'utf-8');
+    fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.html`), createHtml(relatorios), 'utf-8');
     console.log("Relatorios criados com sucesso!")
 })();
