@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": "index.js",
   "scripts": {
     "start": "npx organize-danfe -p pdfs && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/felipeyukio182/calculate-total-danfe#readme",
   "dependencies": {
+    "dayjs": "^1.11.13",
     "pdf2json": "^3.1.5"
   }
 }
