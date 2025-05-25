@@ -47,10 +47,10 @@ function lerPDF(filePath) {
     const notas = [];
     const erros = [];
 
-    const arquivos = fs.readdirSync(__dirname).filter(f => f.toLowerCase().endsWith('.pdf'));
+    const arquivos = fs.readdirSync(process.cwd()).filter(f => f.toLowerCase().endsWith('.pdf'));
 
     for (const arquivo of arquivos) {
-        const caminho = path.join(__dirname, arquivo);
+        const caminho = path.join(process.cwd(), arquivo);
         const pdfData = await lerPDF(caminho);
 
         let cnpj = '';
@@ -138,17 +138,22 @@ function lerPDF(filePath) {
         relatorio.total = relatorio.notas.reduce((prev, curr) => prev + curr.valorNota, 0);
     })
 
-    const pastaDestino = path.join(__dirname, 'relatorios');
-
-    if (!fs.existsSync(pastaDestino)) {
-      fs.mkdirSync(pastaDestino, { recursive: true });
+    try {
+        const pastaDestino = path.join(process.cwd(), 'relatorios');
+    
+        if (!fs.existsSync(pastaDestino)) {
+          fs.mkdirSync(pastaDestino, { recursive: true });
+        }
+    
+        const currDate = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        const dateFormat = currDate.split(/[/,:\s]+/).join('-');
+    
+        fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.json`), JSON.stringify(relatorios), 'utf-8');
+        fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.html`), createHtml(relatorios), 'utf-8');
+    } catch (error) {
+        console.log(error)
     }
 
-    const currDate = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    const dateFormat = currDate.split(/[/,:\s]+/).join('-');
-
-    fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.json`), JSON.stringify(relatorios), 'utf-8');
-    fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.html`), createHtml(relatorios), 'utf-8');
     console.log("Relatorios criados com sucesso!");
 
     // Aguarda o usuário apertar Enter para fechar
