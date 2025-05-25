@@ -149,5 +149,15 @@ function lerPDF(filePath) {
 
     fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.json`), JSON.stringify(relatorios), 'utf-8');
     fs.writeFileSync(path.join(pastaDestino, `relatorios_${dateFormat}.html`), createHtml(relatorios), 'utf-8');
-    console.log("Relatorios criados com sucesso!")
+    console.log("Relatorios criados com sucesso!");
+
+    // Aguarda o usuário apertar Enter para fechar
+    const pause = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    pause.question('\nPressione Enter para sair...', () => {
+        pause.close();
+    });
 })();
