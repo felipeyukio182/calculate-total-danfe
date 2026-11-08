@@ -78,10 +78,18 @@ const createTable = (relatorio) => {
         </tr>
       </thead>
       <tbody>
-      ${relatorio.notas.map(nota => `<tr><td>${nota.numeroNota}</td><td>${nota.valorNota}</td><td>${nota.data}</td></tr>`).join('')} 
+      ${relatorio.notas.map(nota => `<tr><td>${nota.numeroNota}</td><td>${formatarReal(nota.valorNota)}</td><td>${nota.data}</td></tr>`).join('')}
       </tbody>
     </table>
-    <div class="total">Total: R$ ${relatorio.total}</div>
+    <div class="total">Total: R$ ${formatarReal(relatorio.total)}</div>
   </div>
     `;
+}
+
+// Formata no padrão brasileiro (ex: 1958.5 -> 1.958,50) sem depender do ICU do executável
+const formatarReal = (valor) => {
+    const centavos = Math.round(valor * 100);
+    const inteiro = Math.floor(centavos / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const decimal = (centavos % 100).toString().padStart(2, '0');
+    return `${inteiro},${decimal}`;
 }

@@ -29,6 +29,14 @@ function lerPDF(filePath) {
     });
 }
 
+// Converte valor no formato brasileiro (ex: 1.958,00) para número.
+// Retorna '' se o texto não estiver no formato esperado, para a nota ir para os erros.
+function converterValorBR(texto) {
+    const valor = texto.trim();
+    if (!/^\d{1,3}(\.\d{3})*,\d{2}$/.test(valor)) return '';
+    return Number.parseFloat(valor.replace(/\./g, '').replace(',', '.'));
+}
+
 (async () => {
 
     const format = 'DD-MM-YYYY';
@@ -76,8 +84,9 @@ function lerPDF(filePath) {
             }
 
             // Posição do valor total da nota
-            if (item.x >= 34 && item.x <= 35 && item.y >= 21 && item.y <= 22.5) {
-                valorNota = Number.parseFloat(decodeURIComponent(item.R[0].T));
+            // O valor é alinhado à direita, então valores maiores começam mais à esquerda
+            if (item.x >= 32 && item.x <= 36 && item.y >= 21 && item.y <= 22.5) {
+                valorNota = converterValorBR(decodeURIComponent(item.R[0].T));
             }
 
             // console.log(item.x, item.y, item.R)
@@ -116,6 +125,7 @@ function lerPDF(filePath) {
             relatorios.push({
                 cnpj: nota.cnpj,
                 notas: [nota],
+                erros: [],
                 total: 0,
             })
         }
@@ -128,6 +138,7 @@ function lerPDF(filePath) {
         } else {
             relatorios.push({
                 cnpj: erro.cnpj,
+                notas: [],
                 erros: [erro],
                 total: 0,
             })
@@ -135,7 +146,9 @@ function lerPDF(filePath) {
     });
 
     relatorios.forEach(relatorio => {
-        relatorio.total = relatorio.notas.reduce((prev, curr) => prev + curr.valorNota, 0);
+        // Soma em centavos inteiros para evitar erros de ponto flutuante (ex: 0.1 + 0.2)
+        const totalCentavos = relatorio.notas.reduce((prev, curr) => prev + Math.round(curr.valorNota * 100), 0);
+        relatorio.total = totalCentavos / 100;
     })
 
     try {
@@ -165,4 +178,18 @@ function lerPDF(filePath) {
     pause.question('\nPressione Enter para sair...', () => {
         pause.close();
     });
-})();
+})().catch(error => {
+    console.error('\nOcorreu um erro ao gerar os relatorios:');
+    console.error(error);
+
+    // Mantém a janela aberta para o usuário conseguir ler o erro
+    const pause = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    pause.question('\nPressione Enter para sair...', () => {
+        pause.close();
+        process.exit(1);
+    });
+});
